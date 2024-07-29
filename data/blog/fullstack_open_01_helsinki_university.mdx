@@ -1,0 +1,96 @@
+---
+title: fullstack_open_01_heisinki_university
+date: '2024-07-27'
+description: 这里是一个关于学习赫尔辛基大学的一个全栈教程的文档学习笔记，这里是第一部分React的简介  https://fullstackopen.com/zh/part1/react_%E7%AE%80%E4%BB%8B
+---
+
+# React 简介
+
+要创建一个React应用，最简单的方式就是一个叫做create-react-app的工具。
+
+大概的方式就是：
+```
+npx create-react-app part1
+cd part1
+```
+
+应用的运行方式
+```
+npm start
+```
+
+默认情况端口运行，http://localhost:3000
+实际项目已经给你创建了不少的文件
+
+比如说index.js 
+
+```
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+import App from './App'
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+```
+实际上引入了一个叫做App的组件，这个组件是一个函数，它返回了一个React元素
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+这一行代码涉及到React应用的启动过程，它是将React组件渲染到DOM中的关键步骤
+
+（1）查找DOM元素： document.getElementById('root') 查找到HTML中的<div id="root"></div>元素。
+（2）创建根： ReactDOM.createRoot(element)根据找到的元素创建一个React根。
+（3）渲染组件： 根的render方法被调用并传递了<App />，启动组件树的渲染并将它们插入文档中的<div id="root">，<App />就是主应用组件，也就是App.js,根据代码引入的那块也能找打对应的App.js位置。
+
+简单的一个Hello word demo
+
+可以修改App.js的内容如下
+
+```
+import logo from './logo.svg';
+import './App.css';
+
+const App = () => {
+  return (
+    <div>
+      <p>Hello world</p>
+    </div>
+  )
+}
+
+export default App;
+
+```
+
+
+## 组件Component
+文件App.js就是一个定义名为App的React组件
+还是index.js最后一句命令（index.js和index.html应用程序的启动点）
+
+index.html            index.js
+------------------    ----------------------------------------
+<!DOCTYPE html>       import React from 'react';
+<html>                import ReactDOM from 'react-dom/client';
+  <head>             import App from './App';
+  </head>            import './index.css';
+  <body>           
+    <div id="root">   const root = ReactDOM.createRoot(
+    <!-- React 应用 -->  document.getElementById('root')
+    <!-- 将被渲染到这里 --> );
+    </div>           
+  </body>            root.render(
+</html>                <React.StrictMode>
+                          <App />
+                      </React.StrictMode>
+                    );
+
+
+```
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+```
+
+将其内容渲染到div-元素中，该元素在文件public/index.html中定义，其id值为'root'。
+
+App组件
+
+## JSX
+React组件返回的是HTML标记，
