@@ -1,0 +1,50 @@
+---
+title: next-blog-starter-use
+date: '2024-07-08'
+---
+
+
+https://github.com/timlrx/tailwind-nextjs-starter-blog
+
+这个项目是一个Next项目
+值得注意的几个点，
+
+（1）
+首先就是yarn作为包管理工具，我实际比较愿意用npm，因为相对于windows环境npm使用起来感觉更好一些。比如说这个环境变量“PWD”环境变量，你在linux或者UNIX可以使用，但是在windows就不可以，但是我们的脚本一定要到这个当前工作目录。
+
+所以当我们用yarn作为项目包管理工具，项目启动第一个命令yarn dev就会报错：
+Unbound variable "PWD"
+
+我们可以做一些修改来做到，我选择修改package.json来解决跨平台的问题，使它不仅在windows还是Linux环境都可以启动服务器。这里修改的代码的前后对比如下：
+
+
+```
+change before
+
+{
+  "scripts": {
+      "dev": "cross-env INIT_CWD=$PWD next dev",
+  }
+}
+
+
+change after
+{
+  "scripts": {
+    "dev": "node -e \"console.log('Current directory:', process.cwd())\" && next dev"
+  }
+}
+
+
+```
+
+主要的原理就是利用node命令，来获取这个“当前目录”，然后在项目中要用到“当前目录”的地方获取返回过去。
+
+（2）
+mdx文档，和之前的md文档不太一样，mdx是ng是一个md文档的扩展，它可以让我们在md文档中使用jsx语法，来编写我们的代码。
+我们可以直接把一个md文章直接改后缀得到一个mdx文件，然后在上面最修改添加一些jsx代码。
+
+jsx是JavaScript的一个扩展，它允许JavaScript代码中写类似HTML的语法，可以用这种声明式的方式使用HTML标签描述界面。
+
+（3）关于在vercel上的部署
+
