@@ -33,14 +33,12 @@ import App from './App'
 ReactDOM.createRoot(document.getElementById('root')).render(<App />)
 ```
 实际上引入了一个叫做App的组件，这个组件是一个函数，它返回了一个React元素
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />)
 这一行代码涉及到React应用的启动过程，它是将React组件渲染到DOM中的关键步骤
 
 <div>
 （1）查找DOM元素： document.getElementById('root') 查找到HTML中的 id="root"div元素。
 （2）创建根： ReactDOM.createRoot(element)根据找到的元素创建一个React根。
-（3）渲染组件： 根的render方法被调用并传递了<App />，启动组件树的渲染并将它们插入文档中的<div id="root"></div>，<App />就是主应用组件，也就是App.js,根据代码引入的那块也能找打对应的App.js位置。
+（3）渲染组件： 根的render方法被调用并传递了App，启动组件树的渲染并将它们插入文档中的 id="root"，App就是主应用组件，也就是App.js,根据代码引入的那块也能找打对应的App.js位置。
 </div>
 简单的一个Hello word demo
 
