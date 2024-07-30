@@ -96,4 +96,142 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />)
 App组件
 
 ## JSX
-React组件返回的是HTML标记，
+React组件返回的是HTML标记，实际上是按照处理一种写JavaScript的方式来完成，底层由React组件返回的JSX被编译成JavaScript。
+
+类似：
+```
+const App = () => {
+  const now = new Date()
+  const a = 10
+  const b = 20
+  return React.createElement(
+    'div',
+    null,
+    React.createElement(
+      'p', null, 'Hello world, it is ', now.toString()
+    ),
+    React.createElement(
+      'p', null, a, ' plus ', b, ' is ', a + b
+    )
+  )
+}
+```
+
+
+JSX像HTML，区别在于使用JSX，你可以通过在大括号内编写适当的JavaScript来轻松嵌入动态内容，JSX理念和很多的模板语言非常相似，例如与Java Spring 一起手机用的Thymeleaf，
+他被用在服务器上。
+JSX是“XML-like”语言，意味着每个标签都需要被关闭。
+
+## 混合组件 Multiple components
+就是多个组件配合在一起,这里定义一个Hello组件，通过定义常量，JavaScript函数的方式
+```
+//multiple components 添加Hello组件
+const Hello = () => {
+  return (
+    <div>
+      <p>Hello ZP</p>
+    </div>
+  )
+}
+
+const App = () => {
+  return (
+    <div>
+      <h1>Greetings</h1>
+      <Hello />
+      <Hello />
+      <Hello />
+    </div>
+  )
+}
+
+export default App;
+```
+编写组件很容易，通过组合组件，即使是比较复杂的应用也能保持一定的可维护性，React核心理念由许多专门的可重复使用的维护组件组成应用。
+当然有一个强制的惯例，在应用的组件树的顶端有一个叫做App的根组件，有些时候组件App并不完全是根，而是包裹在一个适当的实用组件中。
+
+
+## 传递数据给组件 props：passing data to components
+通过props像组件传递数据
+
+这个props在React里面，就是properties的缩写，这个props是一个组件传递数据的机制，props允许父组件向子组件传递数据，子组件通过props来获取这些数据。
+理解和使用props是创建交互式和动态交互的React应用的关键。
+现在定义组件的函数有一个参数props，作为一个参数，该参数接收一个对象，该对象有对应于组件用户定义的props的字段
+
+```
+const Hello = (props) => {
+  return (
+    <div>
+
+      <p>Hello {props.name}</p>
+    </div>
+  )
+}
+
+const App = () => {
+  return (
+    <div>
+      <h1>Greetings</h1>
+
+      <Hello name="George" />
+      <Hello name="Daisy" />
+    </div>
+  )
+}
+export default App;
+
+```
+以上是一个简单例子，props例子，传递的是Hello组件的，name属性。
+
+可以更复杂一点，通过“硬解码”的字符串，或JavaScript表达式的结果，如果prop的值是用JavaScript实现的，但是必须用大括号括起来。
+
+```
+const Hello = (props) => {
+  return (
+    <div>
+      <p>
+
+        Hello {props.name}, you are {props.age} years old
+      </p>
+    </div>
+  )
+}
+
+const App = () => {
+
+  const name = 'Peter'
+  const age = 10
+
+  return (
+    <div>
+      <h1>Greetings</h1>
+
+      <Hello name="Maya" age={26 + 10} />
+      <Hello name={name} age={age} />
+    </div>
+  )
+}
+export default App;
+```
+
+PS:
+React组件名称必须大写
+
+# javascript
+Node.js 是一个基于Google Chrome V8 JavaScript运行环境，几乎可以在任何地方工作，从服务器到手机的应用。
+
+变量 Variables
+在JavaScript中，有几种方法来定义变量
+```
+const x = 1
+let y = 5
+
+console.log(x, y)   // 1, 5 are printed
+y += 10
+console.log(x, y)   // 1, 15 are printed
+y = 'sometext'
+console.log(x, y)   // 1, sometext are printed
+x = 4               // causes an error
+```
+const 实际上并没有定义一个变量，而是一个常量，类似Java final修饰的。
+let就是简单的定义一个简单的变量。
