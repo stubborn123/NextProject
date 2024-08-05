@@ -8,3 +8,316 @@ description: 这里是一个关于学习赫尔辛基大学的一个全栈教程�
 
 console.log
 一个有经验的JavaScript程序员和一个菜鸟之间有什么区别？有经验的老鸟使用console.log的次数要多10-100倍。
+
+console.log命令调试，不要用Java的加号拼接的方式，要用逗号分开来打印
+```
+console.log('props value is', props)
+```
+
+Visual Studio Code snippets
+在VS，可以很容易创建片段，即快速生成常用重复部分
+（这个类似代码提示，就是打几个字母，idea联想代码，参照https://code.visualstudio.com/docs/editor/userdefinedsnippets#_creating-your-own-snippets ， 有些有用的现成的片段可以通过插件来找到）
+
+JavaScript Arrays
+使用JavaScript数组的函数式编程方法，例如find，filter和map。类似于Java8的stream。
+
+JavaScript的函数式编程部分：
+（1）高阶函数
+（2）map
+（3）Reduce基础知识
+
+Event Handlers Revisited
+
+Rendering Collections
+App.js
+
+```
+const App = (props) => {
+  const { notes } = props
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <ul>
+        <li>{notes[0].content}</li>
+        <li>{notes[1].content}</li>
+        <li>{notes[2].content}</li>
+      </ul>
+    </div>
+  )
+}
+
+export default App
+```
+
+
+index.js
+
+```
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+import App from './App'
+
+const notes = [
+  {
+    id: 1,
+    content: 'HTML is easy',
+    date: '2019-05-30T17:30:31.098Z',
+    important: true
+  },
+  {
+    id: 2,
+    content: 'Browser can execute only JavaScript',
+    date: '2019-05-30T18:39:34.091Z',
+    important: false
+  },
+  {
+    id: 3,
+    content: 'GET and POST are the most important methods of HTTP protocol',
+    date: '2019-05-30T19:20:14.298Z',
+    important: true
+  }
+]
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <App notes={notes} />
+)
+```
+
+key-attribute
+
+```
+const App = (props) => {
+  const { notes } = props
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <ul>
+        {notes.map(note =>
+
+          <li key={note.id}>
+            {note.content}
+          </li>
+        )}
+      </ul>
+    </div>
+  )
+}
+```
+
+map
+
+
+Anti-pattern: Array Indexes as Keys
+
+Refactoring Modules
+
+When the Application Breaks
+就是应用会崩溃，可以添加打印日志
+
+# b 表单
+来一个完整的代码
+App.js
+```
+// src/App.jsx
+import React, { useState } from 'react';
+import Note from './components/Note';  // 注意: 路径的正确性
+
+const App = (props) => {
+  const [notes, setNotes] = useState(props.notes);
+
+  const addNote = (event) => {
+    event.preventDefault();
+    console.log('button clicked', event.target);
+  };
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <ul>
+        {notes.map((note) => (
+          <Note key={note.id} note={note} />
+        ))}
+      </ul>
+
+      <form onSubmit={addNote}>
+        <input />
+        <button type="submit">save</button>
+      </form>
+    </div>
+  );
+};
+
+export default App;
+
+```
+
+组件Note，Note.js(注意项目结构)
+```
+// src/components/Note.jsx
+import React from 'react';
+
+const Note = ({ note }) => {
+  return (
+    <li>
+      {note.content}
+    </li>
+  );
+};
+
+export default Note;
+
+```
+
+
+index.js
+```
+// src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+const notes = [
+  {
+    id: 1,
+    content: 'HTML is easy',
+  },
+  {
+    id: 2,
+    content: 'Browser can execute only JavaScript',
+  },
+  {
+    id: 3,
+    content: 'Most important methods of HTTP protocol are GET and POST',
+  }
+];
+
+ReactDOM.render(<App notes={notes} />, document.getElementById('root'));
+
+```
+
+
+这里有一个event，参数event是触发调用事件处理函数的事件。
+事件处理程序立即调用event.preventDefault()方法，防止提交表单的默认动作。默认动作会，忽略其他操作，导致页面重新加载。
+
+
+Controlled component
+
+添加一个note
+
+const [notes, setNotes] = useState(props.notes); 这段代码涉及 React 的 useState Hook，它是用于管理组件状态的一个重要工具。
+
+const [notes, setNotes]
+notes：状态变量，表示当前的笔记列表。在初始渲染时，这个值等于 props.notes。
+setNotes：状态更新函数，用于更新 notes 状态。当你需要更新 notes 状态时，可以调用 setNotes 并传入新的状态值。这个hook就是涉及到notes变量，setNotes就是修改notes这个变量的函数。
+
+
+```
+//添加新的状态
+const App = (props) => {
+  const [notes, setNotes] = useState(props.notes)
+  const [newNote, setNewNote] = useState(
+    'a new note...'
+  )
+
+  // ...
+  const addNote = (event) => {
+    event.preventDefault();
+    const noteObject = {
+      content: newNote,
+      id: notes.length + 1,
+    };
+
+    setNotes(notes.concat(noteObject));
+    setNewNote(''); // 提交后清空输入框
+  };
+
+
+
+  const handleNoteChange = (event) => {
+    console.log(event.target.value)
+    setNewNote(event.target.value)
+  }
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <ul>
+        {notes.map(note =>
+          <Note key={note.id} note={note} />
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input
+          value={newNote}
+
+          onChange={handleNoteChange}
+        />
+        <button type="submit">save</button>
+      </form>
+    </div>
+  )
+}
+```
+
+
+Filtering Displayed Elements
+添加一个显示的组件
+```
+//添加显示组件
+const App = (props) => {
+  const [notes, setNotes] = useState(props.notes)
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(true)
+
+// 根据 showAll 筛选要展示的 notes
+const notesToShow = showAll
+? notes
+: notes.filter(note => note.important);
+
+const addNote = (event) => {
+event.preventDefault();
+const noteObject = {
+  content: newNote,
+  important: Math.random() > 0.5,
+  id: notes.length + 1,
+};
+
+setNotes(notes.concat(noteObject));
+setNewNote(''); // 提交后清空输入框
+};
+
+const handleNoteChange = (event) => {
+setNewNote(event.target.value);
+};
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all' }
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(note =>
+          <Note key={note.id} note={note} />
+        )}
+      </ul>
+      // ...
+    </div>
+  )
+}
+```
+
+
+官方的代码：https://github.com/fullstack-hy2020/part2-notes/tree/part2-3
+我的代码：https://github.com/stubborn123/part1 （我这里是没区分章节，都是在注释的代码）
+
+
+# c 从服务器获取数据
+前面的部分都是前端，这部分需要后端去处理，需要服务器来提供数据。
+
+他这里用到一个工具，JSON服务器，git地址：https://github.com/typicode/json-server 
