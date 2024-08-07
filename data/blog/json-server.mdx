@@ -3,3 +3,36 @@ title: next-blog-features
 date:  2024-08-05
 description: json-server,一个服务器工具的使用，搭配的是赫尔辛基的全栈课程来做的
 ---
+
+项目GitHub地址：https://github.com/typicode/json-server
+
+它是一个轻量级的 Node.js 模拟服务器，可以非常方便地设置一个 RESTful API 服务，主要用于原型开发、前端开发和测试。
+可以通过一个简单的 JSON 文件快速生成一个完整的 RESTful API
+
+
+安装：（全局）
+```
+npm install json-server -g
+```
+
+
+运行: （这里需要一个json文件，里面是定义的数据）
+这个db.json定义数据
+
+
+```
+npx json-server --port 3001 --watch db.json
+
+指定端口运行
+npx json-server --port 3001 --watch db.json
+
+```
+页面查看地址http://localhost:3001/notes    （默认地址端口3000，这个地址是指定3001端口）
+
+
+卸载：
+```
+npm uninstall -g json-server
+
+npm uninstall json-server
+```

@@ -321,3 +321,355 @@ setNewNote(event.target.value);
 前面的部分都是前端，这部分需要后端去处理，需要服务器来提供数据。
 
 他这里用到一个工具，JSON服务器，git地址：https://github.com/typicode/json-server 
+
+项目根目录创建一个db.json  (根目录就是在项目最上一层的，和package.json同级)
+
+```
+{
+  "notes": [
+    {
+      "id": 1,
+      "content": "HTML is easy",
+      "date": "2022-1-17T17:30:31.098Z",
+      "important": true
+    },
+    {
+      "id": 2,
+      "content": "Browser can execute only JavaScript",
+      "date": "2022-1-17T18:39:34.091Z",
+      "important": false
+    },
+    {
+      "id": 3,
+      "content": "GET and POST are the most important methods of HTTP protocol",
+      "date": "2022-1-17T19:20:14.298Z",
+      "important": true
+    }
+  ]
+}
+```
+
+安装json-server
+```
+npm install -g json-server
+```
+运行json-server (json-server默认是3000，跟项目抢端口，所以要指定一下端口)
+```
+npx json-server --port 3001 --watch db.json
+```
+运行成功打开http://localhost:3001/notes
+
+## the browser as a runtime environment
+这些要使用JavaScript从服务器获取数据的方法，例子使用的是XMLHttpRequest来获取，现在最流行的是fetch方法，基于promises不是XHR使用的事件驱动模型。
+
+XHR获取数据方式如下
+```
+const xhttp = new XMLHttpRequest()
+
+xhttp.onreadystatechange = function() {
+  if (this.readyState == 4 && this.status == 200) {
+    const data = JSON.parse(this.responseText)
+    // handle the response that is saved in variable data
+  }
+}
+
+xhttp.open('GET', '/data.json', true)
+xhttp.send()
+```
+JavaScript 引擎是单线程的，不能并行执行代码，使用非阻塞模型来执行IO操作。
+JavaScript引擎的这种单线程特性的另一个后果是，某些代码的执行占用大量的时间，浏览器会被卡住。
+
+
+## npm
+基于promise的函数fetch来从服务器获取数据，fetch被所有现代浏览器支持（不包括IE）
+
+还可以使用axios库来代替浏览器和服务器之间的通信，功能类似于fetch，使用另一个很好的理由熟悉在React项目中添加外部库，即所谓npm包。
+
+现在几乎所有的JavaScript项目都是用node包管理器来定义，就是npm，npm项目明显标志是位于项目根部的package.json文件。
+
+使用axios
+```
+npm install axios
+```
+在package.json 文件有对应的项目依赖项，执行完上面安装axios的命令，package.json文件会自动添加axios依赖项。
+
+像有一些工具需要添加依赖处理，比如这个json-server
+```
+npm install json-server --save-dev
+```
+PS:使用json-server做服务器打包还要对package.json文件的script部分做一个小小的补充
+```
+{
+  // ...
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+
+    "server": "json-server -p3001 --watch db.json"
+  },
+}
+```
+这样根目录启动,json-server
+```
+npm run server
+```
+
+## Axios and promises
+假定json-server在3001端口运行（同时用的话，需要两个终端端口，一个保持json-server运行，一个运行react-app）
+这个库像其他库（如React）一样被使用，即使使用适当的import语句。
+
+index.js
+```
+import axios from 'axios'
+
+const promise = axios.get('http://localhost:3001/notes')
+console.log(promise)
+
+const promise2 = axios.get('http://localhost:3001/foobar')
+console.log(promise2)
+```
+
+## Effect-hooks
+这个和之前的state一样，也是个钩子，只不过这个Effect是这个钩子：
+Effect允许组件连接到外部系统并与之同步
+他可以处理网络，浏览器，DOM，动画，使用不同UI库编写的小部件以及其他非React代码
+
+从服务器获取数据，Effect是一个正确的工具。
+
+app.js
+```
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import Note from './components/Note'
+
+
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(true)
+
+
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/notes')
+      .then(response => {
+        console.log('promise fulfilled')
+        setNotes(response.data)
+      })
+  }, [])
+  console.log('render', notes.length, 'notes')
+
+  // ...
+}
+```
+
+以下是整个项目代码：
+index.html
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Note App</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+```
+
+index.js
+```
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+App.js
+```
+import React, { useState, useEffect } from 'react';
+import Note from './components/Note';
+import noteService from './services/notes';
+
+const App = () => {
+  // 定义笔记列表数组
+  const [notes, setNotes] = useState([]);
+  // 定义一个新的笔记对象
+  const [newNote, setNewNote] = useState('');
+  // 定义是否展示全部变量
+  const [showAll, setShowAll] = useState(true);
+
+  // 使用 useEffect 钩子从服务器获取数据
+  useEffect(() => {
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes);
+      });
+  }, []);
+
+  // 提交新笔记
+  const addNote = (event) => {
+    event.preventDefault();
+    const noteObject = {
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() > 0.5,
+    };
+
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        setNotes(notes.concat(returnedNote));
+        setNewNote('');
+      });
+  };
+
+  // 控制输入框
+  const handleNoteChange = (event) => {
+    setNewNote(event.target.value);
+  };
+
+  const notesToShow = showAll
+    ? notes
+    : notes.filter(note => note.important);
+
+  return (
+    <div>
+      <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          {showAll ? 'Show important' : 'Show all'}
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(note =>
+          <Note key={note.id} note={note} />
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input value={newNote} onChange={handleNoteChange} />
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  );
+};
+
+export default App;
+```
+services/notes.js
+```
+import axios from 'axios';
+const baseUrl = 'http://localhost:3001/notes';
+
+// 从服务器获取所有笔记
+const getAll = () => {
+  const request = axios.get(baseUrl);
+  return request.then(response => response.data);
+};
+
+// 在服务器上创建新笔记
+const create = newObject => {
+  const request = axios.post(baseUrl, newObject);
+  return request.then(response => response.data);
+};
+
+// 更新笔记
+const update = (id, newObject) => {
+  const request = axios.put(`${baseUrl}/${id}`, newObject);
+  return request.then(response => response.data);
+};
+
+export default { getAll, create, update };
+```
+component/Note.jsx
+```
+import React from 'react';
+
+const Note = ({ note }) => {
+  return (
+    <li>
+      {note.content}
+    </li>
+  );
+};
+
+export default Note;
+```
+db.json
+```
+{
+  "notes": [
+    {
+      "id": "1",
+      "content": "HTML is easy",
+      "date": "2022-1-17T17:30:31.098Z",
+      "important": true
+    },
+    {
+      "id": "2",
+      "content": "Browser can execute only JavaScript",
+      "date": "2022-1-17T18:39:34.091Z",
+      "important": false
+    },
+    {
+      "id": "3",
+      "content": "GET and POST are the most important methods of HTTP protocol",
+      "date": "2022-1-17T19:20:14.298Z",
+      "important": true
+    },
+    {
+      "id": "70f9",
+      "content": "131242342",
+      "date": "2024-08-06T09:54:18.665Z",
+      "important": false
+    }
+  ]
+}
+```
+PS:这边两个项目都要启动，json-server默认的3000，所以要启动指定别的端口，代码是3001，都不能中断
+
+
+the development runtime environment
+
+
+# d 在服务端上的将数据Alert出来
+REST
+在REST术语，我们定义的这些数据对象，可以称为资源,每个资源都有对应的唯一地址-URL 
+资源是通过HTTP GET请求从服务器获取
+
+Sending Data to the server
+
+创建新笔记出来部分：
+```
+addNote = event => {
+  event.preventDefault()
+  const noteObject = {
+    content: newNote,
+    date: new Date(),
+    important: Math.random() < 0.5,
+  }
+
+
+  axios
+    .post('http://localhost:3001/notes', noteObject)
+    .then(response => {
+      console.log(response)
+    })
+}
+```
+
+Extracting Communication with the Backend into a Separate Module
+
+
+Cleaner Syntax for Defining Object Literals
+
+Promises and Errors
+
+Promise 和 async/await 是 JavaScript 中常用的处理异步操作的手段。结合使用它们可以实现高效的网络请求管理。此外，妥善处理错误并向用户反馈有助于提升应用的可靠性和用户体验。
