@@ -1,0 +1,111 @@
+---
+title: fullstack_open_03_heisinki_university
+date: '2024-08-07'
+description: 这里是一个关于学习赫尔辛基大学的一个全栈教程的文档学习笔记，这里是第3部分用NodeJS和Express写服务端程序 https://fullstackopen.com/zh/part3
+---
+这里会用到MongoDB 
+
+# a Node.js 与 Express
+重点转向后端，在堆栈的服务器上实现功能，用NodeJS
+
+这里纯手敲，并不都是React应用，而且不会使用create-react-app工具来初始化这个应用的项目。
+就是用npm
+
+用npm init生成项目
+```
+npm init
+```
+
+实际上跟其他项目生成的工具一样，也是那种会问你问题比如你描述要填什么，作者要填什么，可以不用管一直回车就够了，反正最后是在这个目录生成一个package.json 文件。
+我的生成文件如下：
+```
+{
+  "name": "part2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+
+```
+
+文件定义了，应用的入口是index.js
+
+在脚本哪里添加改动
+```
+  "scripts": {
+	"start": "node index.js",  
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+```
+新加的修改的意思是当你运行 npm start 时，实际执行的命令是 node index.js（cripts 部分定义了一些常用的命令，使得你可以通过 npm run XXXX 来运行这些命令）
+创建一个index.js文件
+再来个打印日志,在index.js上
+```
+console.log('hello world')
+```
+
+现有的这些代码就可以做一个简单“hello world”了
+可以直接Node命令行执行
+```
+node index.js
+```
+也可以当一个脚本来运行
+```
+npm start
+```
+同理我们也可以测试一下上面定义的npm test
+
+## Simple web server
+编辑index.js文件，将应用编程一个网络服务器
+
+```
+const http = require('http')
+
+const app = http.createServer((request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/plain' })
+  response.end('Hello World')
+})
+
+const PORT = 3001
+app.listen(PORT)
+console.log(`Server running on port ${PORT}`)
+```
+还是按照上面的方式执行，但是这次不是简单的打印日志了，可以访问http://localhost:3001 ，打开我们的应用
+
+解析这个代码，第一行导入内置网络服务器模块
+```
+const http = require('http')
+```
+浏览器运行的代码都使用，模块用export来定义，用import来使用。Node使用CommonJS模块，ES6开始也支持模块，Node对于ES6的模块也支持，但是还差点意思，所以模块一般来说优先使用CmmonJS模块。
+```
+const app = http.createServer((request, response) => {
+  response.writeHead(200, { 'Content-Type': 'text/plain' })
+  response.end('Hello World')
+})
+```
+使用 http 模块的 createServer 方法来创建一个新的网络服务器。
+
+分配给 app 变量的 http 服务器，以监听发送到 3001 端口的 HTTP 请求。
+
+Express
+上面是，Node内置的http网络服务器直接实现服务器代码，但是比较麻烦。许多库已经开发出来，可以直接用，方便服务器端开发。
+目前用的比较流行的模块express
+```
+npm install express
+```
+package.json
+```
+{
+  // ...
+  "dependencies": {
+    "express": "^4.17.2"
+  }
+}
+```
+该依赖的源代码被安装到位于项目根部node/modeules目录（类似Java的maven版本依赖管理文件夹），这里还能看到其他项目中别的依赖关系。
+

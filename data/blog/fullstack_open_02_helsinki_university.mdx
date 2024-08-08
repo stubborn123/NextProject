@@ -673,3 +673,121 @@ Cleaner Syntax for Defining Object Literals
 Promises and Errors
 
 Promise 和 async/await 是 JavaScript 中常用的处理异步操作的手段。结合使用它们可以实现高效的网络请求管理。此外，妥善处理错误并向用户反馈有助于提升应用的可靠性和用户体验。
+使用 try...catch 块可以非常简洁地在 async/await 代码中处理错误
+
+Async：
+
+async 关键字用于标记一个函数为异步函数。
+一个标记为 async 的函数会自动返回一个 Promise，即使它没有显式地返回一个 Promise。
+你可以在 async 函数内部使用 await 关键字。
+Await：
+
+await 关键字只能在 async 函数内部使用。
+它可以暂停 async 函数的执行，等待 Promise 执行，然后恢复 async 函数的执行并返回结果。
+await 可以在很大程度上减少代码的嵌套层级，使异步代码看起来更像同步代码，从而提高代码的可读性。
+
+# e 给React应用加点样式
+
+给首页添加样式文件 index.css
+在index.js导入的样式
+```
+import './index.css'
+```
+css文件上添加CSS规则
+```
+h1 {
+  color: green;
+}
+```
+
+
+```
+const Note = ({ note, toggleImportance }) => {
+  const label = note.important
+    ? 'make not important'
+    : 'make important';
+
+  return (
+    <li>
+      {note.content}
+      <button onClick={toggleImportance}>{label}</button>
+    </li>
+  )
+}
+```
+
+上边都是统一配置的，可以选择一些类选择器，在常规HTML中，可被定义为class属性的值
+```
+<li class="note">some text...</li>
+```
+但是在React中，只能使用className属性而不是HTML的class属性
+```
+const Note = ({ note, toggleImportance }) => {
+  const label = note.important
+    ? 'make not important'
+    : 'make important';
+
+  return (
+
+    <li className='note'>
+      {note.content}
+      <button onClick={toggleImportance}>{label}</button>
+    </li>
+  )
+}
+```
+
+在css文件定义(.classname语法定义)
+```
+.note {
+  color: grey;
+  padding-top: 5px;
+  font-size: 15px;
+}
+```
+Improved error message
+
+代码地址（https://github.com/fullstack-hy2020/part2-notes/tree/part2-7）
+
+
+Inline styles
+React也可以在代码中直接编写样式，即所谓内联样式
+
+每个CSS属性都被定义为JavaScript对象的一个独立属性。像素的数字值可以简单地定义为整数。与普通的CSS相比，其中一个主要区别是，连字符（kebab case）的CSS属性是用camelCase写的。
+
+```
+const Footer = () => {
+  const footerStyle = {
+    color: 'green',
+    fontStyle: 'italic',
+    fontSize: 16
+  }
+  return (
+    <div style={footerStyle}>
+      <br />
+      <em>Note app, Department of Computer Science, University of Helsinki 2022</em>
+    </div>
+  )
+}
+
+const App = () => {
+  // ...
+
+  return (
+    <div>
+      <h1>Notes</h1>
+
+      <Notification message={errorMessage} />
+
+      // ...
+
+
+      <Footer />
+    </div>
+  )
+}
+```
+内联样式有某些限制，伪类不能被直接使用、
+
+这种内联样式和传统的CSS，HTML，Javascript分离不同，但是React是根据应用来划分其逻辑功能实体的基础。
+
