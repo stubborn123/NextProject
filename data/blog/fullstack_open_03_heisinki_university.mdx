@@ -92,7 +92,7 @@ const app = http.createServer((request, response) => {
 
 分配给 app 变量的 http 服务器，以监听发送到 3001 端口的 HTTP 请求。
 
-Express
+## Express
 上面是，Node内置的http网络服务器直接实现服务器代码，但是比较麻烦。许多库已经开发出来，可以直接用，方便服务器端开发。
 目前用的比较流行的模块express
 ```
@@ -109,3 +109,122 @@ package.json
 ```
 该依赖的源代码被安装到位于项目根部node/modeules目录（类似Java的maven版本依赖管理文件夹），这里还能看到其他项目中别的依赖关系。
 
+使用命令更新依赖关系
+```
+npm update
+```
+
+我们在另一台电脑上做这个项目（换电脑或者在别的地方要开发），我们直接可以使用命令package.json中定义项目所有最新的依赖项。
+```
+npm install
+```
+这个类似Java的maven的pom文件执行命令把所有依赖导入进来
+
+## Web and express
+修改代码
+```
+const express = require('express')
+const app = express()
+
+let notes = [
+  ...
+]
+
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>')
+})
+
+app.get('/api/notes', (request, response) => {
+  response.json(notes)
+})
+
+const PORT = 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+```
+
+上面两行，就是导入express，一个app变量就是Express应用
+
+nodemon
+对应用的代码做了修改，我们必须重新启动，要手动关闭和启动应用，这个工具就是nodemon
+nodemon将观察nodemon启动时所在目录中的文件，如果有任何文件发生变化，nodemon将自动重启node应用
+
+安装nodemon
+```
+npm install --save-dev nodemon
+```
+要注意，nodemon依赖要放在devDependences中，因为它是开发依赖，不是生产依赖。如果没有选对参数，把nodemon放在dependencies下，要修改package.json文件，然后重新安装依赖关系，否则会报错。
+
+我们在生产服务器上以生产模式运行，不需要这些开发依赖项。
+我们还可以用nodemon启动应用
+```
+node_modules/.bin/nodemon index.js
+```
+我们可以不用这个命令，做一点修改在package.json中
+```
+{
+  // ..
+  "scripts": {
+    "start": "node index.js",
+
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  // ..
+}
+```
+我们在命令行模式
+```
+npm run dev
+```
+
+REST
+Representational State Transfer，又称 REST,REST 是一种架构风格，旨在建立可扩展的网络应用。
+
+## Fetching a single resource
+
+```
+app.get('/api/notes/:id', (request, response) => {
+  const id = request.params.id
+  const note = notes.find(note => note.id === id)
+  response.json(note)
+})
+```
+这个可以通过id参数来访问
+
+## Deleting resources
+用REST
+DELETE 请求返回什么状态码，目前还没有达成共识。实际上，唯一的两个选择是 204 和 404。为了简单起见，我们的应用在这两种情况下都会用 204 来响应。
+
+```
+app.delete('/api/notes/:id', (request, response) => {
+  const id = Number(request.params.id)
+  notes = notes.filter(note => note.id !== id)
+
+  response.status(204).end()
+})
+```
+这里删除指的从服务器的，不是直接删，而是服务器里面那个notes数组，你重启对应的那个note还在。
+
+## Postman
+HTTP GET 请求容易从浏览器中发出，像REST的DELETE这些不好弄，可以用Postman这个工具来测试
+
+
+## The Visual Studio Code REST client
+可以在vscode上直接请求，通过一个REST client插件来实现
+先安装插件，直接搜“REST”关键词
+安装后如何使用，也是挺简单
+
+就是在项目根部创建一个rest后缀的文件，最好创建一个request文件夹移在下面方便管理。
+```
+GET http://localhost:3001/api/notes
+```
+插件安装好后会有一个“send request”提示，根postman一样
+
+## The webStorm HTTP Client
+用webstorm 也类似有对应的HTP客户端程序，也是创建rest后缀文件
+
+Receiving data
+添加新笔记的功能，在请求body中以JSON格式发布新笔记的所有信息，就可以添加一个笔记。
+方便访问数据，需要express，json-parser的来处理，通过命令app.use(express.json())来使用。
