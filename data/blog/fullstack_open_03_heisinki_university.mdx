@@ -228,3 +228,107 @@ GET http://localhost:3001/api/notes
 Receiving data
 添加新笔记的功能，在请求body中以JSON格式发布新笔记的所有信息，就可以添加一个笔记。
 方便访问数据，需要express，json-parser的来处理，通过命令app.use(express.json())来使用。
+
+
+与 Postman 相比，REST 客户端的一个好处是，请求可以方便地在项目库的根部获得，而且可以分发给开发团队的每个人。你也可以使用###分隔符在同一个文件中添加多个请求。
+```
+GET http://localhost:3001/api/notes/
+
+###
+POST http://localhost:3001/api/notes/ HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sample",
+    "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
+```
+
+" 三点 "spread 语法 ... 转换为单个数字
+函数调用、数组构造或对象字面量时，展开元素或对象属性
+```
+const generateId = () => {
+  const maxId = notes.length > 0
+    ? Math.max(...notes.map(n => n.id))
+    : 0
+  return maxId + 1
+}
+```
+
+```
+const array1 = [1, 2, 3];
+const array2 = [4, 5, 6];
+const combined = [...array1, ...array2];
+
+console.log(combined); // 输出: [1, 2, 3, 4, 5, 6]
+
+```
+
+## About HTTP request types
+HTTP请求类型有关两个的属性：安全和空闲
+
+安全意味着执行的请求不能在服务器中引起任何 副作用 。我们所说的副作用是指数据库的状态不能因为请求而改变，而且响应必须只返回服务器上已经存在的数据。
+空闲 也只是 HTTP 标准中的一个建议，并不是简单地基于请求类型就能保证的。
+
+## Middleware
+中间件，json-parser 就是一个中间件
+
+# b 把应用部署到网上
+
+Same origin policy and CORS
+CORS
+跨源资源共享（CORS）是一种机制，它允许网页上的限制性资源（如字体）从第一个资源所来自的域之外的另一个域被请求。一个网页可以自由嵌入跨源图像、样式表、脚本、iframe和视频。某些 "跨域 "请求，特别是Ajax请求，在默认情况下是被同源安全策略所禁止的。
+
+只有同源（即协议、主机和端口均相同）的网站才能共享资源。具体来说，同源策略限制了来自不同源的文档或脚本如何互相访问资源，从而防止潜在的恶意访问。
+
+可以安装cors中间件来允许其他站点的请求
+```
+npm install cors
+```
+
+```
+const cors = require('cors')
+
+app.use(cors())
+```
+Application to the Internet
+这里使用的是Herku（一个云平台。快速部署和管理应用程序）
+
+要使用Heroku，要在项目根目录添加一个Procfile文件，告诉Heroku如何启动,在这个文件添加如下命令
+```
+web: npm start
+```
+
+添加环境变量
+```
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+```
+这个heroku不行，创建账号都有问题
+
+Frontend production build
+用create-react-app创建应用可以用npm run build命令创建
+
+```
+npx create-react-app my-app
+cd my-app
+npm start
+```
+
+创建完项目设置一下目录
+根目录创建一个build目录（其中包含我们应用的唯一HTML文件，index.html）
+该目录包含static
+
+Serving static files from the backend
+部署前端的一个选择，将生产构建（build目录）复制到后端仓库的根目录，并配置后端以显示前端的主页（文件build/index.html）作为其主页。
+
+把前端的生产构建复制到后端的根目录下
+express显示静态内容，页面index.html和它获取的JavaScript等，我们需要express的一个内置的中间件，叫做static
+
+在中间件的声明中加入以下内容时
+```
+app.use(express.static('build'))
+```
+
