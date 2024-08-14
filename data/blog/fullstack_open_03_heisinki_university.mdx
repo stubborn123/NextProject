@@ -321,14 +321,167 @@ npm start
 根目录创建一个build目录（其中包含我们应用的唯一HTML文件，index.html）
 该目录包含static
 
-Serving static files from the backend
+## Serving static files from the backend
 部署前端的一个选择，将生产构建（build目录）复制到后端仓库的根目录，并配置后端以显示前端的主页（文件build/index.html）作为其主页。
 
 把前端的生产构建复制到后端的根目录下
-express显示静态内容，页面index.html和它获取的JavaScript等，我们需要express的一个内置的中间件，叫做static
+express显示静态内容，页面index.html和它获取的JavaScript等，我们需要express的一个内置的中间件，叫做static（https://expressjs.com/en/starter/static-files.html）
 
 在中间件的声明中加入以下内容时
 ```
 app.use(express.static('build'))
 ```
 
+每当express收到一个HTTP GET请求时，它将首先检查build目录中是否包含一个与请求地址相对应的文件。如果找到了正确的文件，express将返回它。
+
+## Streamlining deploying of the Frontend
+创建一个前端构建,不需要额外的手工工作，让我们在后端仓库package.json中添加一些npm脚本
+
+```
+{
+  "scripts": {
+    //...
+    "build:ui": "rm -rf build && cd ../part2-notes/ && npm run build && cp -r build ../notes-backend",
+    "deploy": "git push heroku main",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
+    "logs:prod": "heroku logs --tail"
+  }
+}
+```
+脚本 npm run build:ui 构建前端，并将生产版本复制到后端仓库下。 npm run deploy释放当前的后端到heroku。
+
+Proxy
+
+```
+{
+  "dependencies": {
+    // ...
+  },
+  "scripts": {
+    // ...
+  },
+
+  "proxy": "http://localhost:3001"
+}
+```
+# c 将数据存入MongoDB
+## Debugging Node applications
+打印到控制台是一种经过验证的方法
+
+### Visual Studio Code
+某些情况下，Visual Studio Code的调试器可能很有用
+
+### Chrome dev tools
+启动应用程序Chrome开发者平台调试
+```
+node --inspect index.js
+```
+也可以把inspect 标志传递给nodemon
+```
+nodemon --inspect index.js
+```
+
+### Question everything
+您必须对所有事物提出质疑，逐个排除所有可能性。记录到控制台、使用 Postman、调试器和经验都会有所帮助。
+
+MongoDB
+MongoDB是一种所谓的文档数据库，这种要比关系型数据库更简单。文档型数据库归类NoSQL。
+
+除了下载安装运行MongoDB，互联网也有许多可用的Mongo数据库服务，课程选择的是MongoDB Atlas（https://www.mongodb.com/products/platform/atlas-database）
+
+
+这里注册，使用选择免费的创建，弄一个账户密码形式connect，获取connect uri 是提供应用程序Mongo DB客户端库的数据库地址。
+
+使用的是Mongooose库，提供了更高级的API
+安装Mongoose
+```
+npm install mongoose
+```
+使用
+```
+const mongoose = require('mongoose')
+
+if (process.argv.length<3) {
+  console.log('give password as argument')
+  process.exit(1)
+}
+
+const password = process.argv[2]
+
+const url =
+  `mongodb+srv://fullstack:${password}@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority`
+
+mongoose.set('strictQuery',false)
+
+mongoose.connect(url)
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
+
+const note = new Note({
+  content: 'HTML is easy',
+  important: true,
+})
+
+note.save().then(result => {
+  console.log('note saved!')
+  mongoose.connection.close()
+})
+```
+
+
+## Schema
+数据库建立连接后，笔记定义schema，并创建相应的model
+```
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
+```
+
+Mongoose存储在数据库中的数据应用程序级别赋予一个schema，定义存储任何集合中的文档。
+
+## Creating and Saving objects
+
+
+## Fetching objects from the database
+
+connecting the backend to a database
+
+Database configuration into its own modeule
+
+Important note to Fly.io users
+GitHub不是与Fly.io一起使用的，所以当应用程序被部署时，.env文件也会被传到Fly.io服务器
+
+Using database in route handlers
+
+Verifuing frontend and backend integration
+
+Error handling
+
+Moving error handling into Middleware
+
+The order of middleware loading
+
+Other operations
+
+A true full stack developer oath
+
+## d ESLint与代码检查
+对存储在应用程序数据库中的数据应用一些约束，要检查有效性，应用程序不应接收缺少或空的某些属性。
+
+Deploying the database backend to production
+应用程序应该能在Fly.io/Render上原样工作
+
+dotenv定义的环境变量只会在后端不处于生产模式的使用，即在Fly.io 或Render中
+生产环境，托管应用服务设置数据库URL
+Fly.io中，通过fly secrets set命令完成
+
+Lint
+ESlint有大量的规则，这些规则通过编辑 .eslintrc.js 文件就可以很容易地使用。
