@@ -4,7 +4,7 @@ date:  '2024-08-12'
 description: 用render配置项目，应用部署到网上
 ---
 
-这里主要是part3 c部分
+这里主要是part3部分
 这部分首先问题比较多，推荐的平台Heroku也有点问题，注册不了，毕竟是2022年写的教程。
 而且这部分涉及到前后端结合的问题，这个之前确实也没怎么用过，所以疑问也比较多，所以单独在AI的帮助分析下学习。
 
@@ -22,7 +22,39 @@ npm run build
 ```
 build命令创建优化后的生产版本，代码最小化，删除不必要的调试信息
 
-部署到互联网
+# 部署到互联网
 将应用程序部署到Web服务器
 
+## 项目初始化
+先要创建一个myapp目录，在里面创建前端和后端项目
+这个教程的后端代码：https://github.com/fullstack-hy2020/part3-notes-backend/tree/part3-3 （也是crate react app工具创建的）
+         前端代码：https://github.com/fullstack-hy2020/part2-notes/tree/part3-1
 
+可以对比一下
+1 初始化前端项目
+使用Create React App工具来创建项目
+```
+npx create-react-app myapp-frontend
+
+```
+
+2 初始化后端项目
+后端项目是手动创建的，要安装所需的依赖
+```
+mkdir myapp-backend
+cd myapp-backend
+npm init -y
+npm install express mongoose cors dotenv
+npm install --save-dev nodemon
+
+```
+
+npm命令初始化node项目
+安装express后端，mongoose最为mongo管理工具，cors作为服务器处理跨域，跨资源共享的工具，dotenv就是一个处理环境变量配置管理的工具。
+
+nodemon 是一个开发工具，用来自动重启 Node.js 服务器，当检测到文件有变化时，它会自动重启应用
+npm install --save-dev nodemon 命令安装 nodemon 并将其添加到项目的开发依赖项中。这提高了开发效率，尤其是在开发过程中频繁修改代码的情况下
+
+前端代码实现
+这里要处理的是前端，在文件夹myapp-frontend
+修改App.js

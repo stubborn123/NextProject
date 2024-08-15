@@ -39,4 +39,123 @@ module.exports = {
   info, error
 }
 ```
+记录器有两个函数，info打印正常日志信息，error所有错误信息
 
+日志提取到自己的模块，写入文件或将它们发送到外部日志服务，如 graylog 或 papertrail 我们只需要在一个地方进行修改。
+
+用于启动应用的index.js文件的内容被简化如下
+```
+const app = require('./app') // the actual Express application
+const http = require('http')
+const config = require('./utils/config')
+const logger = require('./utils/logger')
+
+const server = http.createServer(app)
+
+server.listen(config.PORT, () => {
+  logger.info(`Server running on port ${config.PORT}`)
+})
+```
+
+环境变量的处理被提取到一个单独的utils/config.js
+```
+require('dotenv').config()
+
+const PORT = process.env.PORT
+const MONGODB_URI = process.env.MONGODB_URI
+
+module.exports = {
+  MONGODB_URI,
+  PORT
+}
+```
+
+应用的其他部分可以通过导入配置模块访问环境变量
+```
+const config = require('./utils/config')
+
+logger.info(`Server running on port ${config.PORT}`)
+```
+
+路由处理程序在一个专门的模块contollers，notes相关路由在controllers目录下的note.js模块中
+```
+const notesRouter = require('express').Router()
+const Note = require('../models/note')
+
+notesRouter.get('/', (request, response) => {
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
+})
+
+notesRouter.get('/:id', (request, response, next) => {
+  Note.findById(request.params.id)
+    .then(note => {
+      if (note) {
+        response.json(note)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+})
+
+notesRouter.post('/', (request, response, next) => {
+  const body = request.body
+
+  const note = new Note({
+    content: body.content,
+    important: body.important || false,
+  })
+
+  note.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    })
+    .catch(error => next(error))
+})
+
+notesRouter.delete('/:id', (request, response, next) => {
+  Note.findByIdAndDelete(request.params.id)
+    .then(() => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+notesRouter.put('/:id', (request, response, next) => {
+  const body = request.body
+
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
+
+  Note.findByIdAndUpdate(request.params.id, note, { new: true })
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+})
+
+module.exports = notesRouter
+```
+目录结构
+```
+├── index.js
+├── app.js
+├── build
+│   └── ...
+├── controllers
+│   └── notes.js
+├── models
+│   └── note.js
+├── package-lock.json
+├── package.json
+├── utils
+│   ├── config.js
+│   ├── logger.js
+│   └── middleware.js
+```
+
+Note on exports
