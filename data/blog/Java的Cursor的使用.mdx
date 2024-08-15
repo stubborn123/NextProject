@@ -1,0 +1,79 @@
+---
+title: Java的Cursor的使用
+date:  '2024-08-15'
+description: Java的Cursor的使用场景,由于数据集过大导致内存占用过大或溢出的情况。通过一行一行读取
+---
+最近看代码，有一段代码涉及到Cursor，感觉写法挺有意思的。注意是Cursor，而不是Consumer，我之前把两个搞混了，看代码看的浑浑噩噩的。
+
+这里说的Cursor，一般来是JDBC的工具，像我在项目中的mybatis里面的Cursor。
+```
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package org.apache.ibatis.cursor;
+
+import java.io.Closeable;
+
+public interface Cursor<T> extends Closeable, Iterable<T> {
+    boolean isOpen();
+
+    boolean isConsumed();
+
+    int getCurrentIndex();
+}
+
+```
+Cursor用途一般就是遍历查询结果集,比如下面
+```
+        try(Cursor<AssetDO> cursor = assetMapper.streamQueryAssetByRange(maps)) {
+            Iterator<AssetDO> iterator = cursor.iterator();
+            List<AssetDO> list = new LinkedList<>();
+            while (iterator.hasNext()){
+                list.add(iterator.next());
+                if(tempCount % limitCount == 0){
+                    consumer.accept(list);
+                    list = new ArrayList<>();
+                }
+                assetCount++;
+                tempCount++;
+            }
+            if(CollectionUtil.isNotEmpty(list)) {
+                consumer.accept(list);
+            }
+        } catch (IOException e) {
+            log.info(e.getMessage(), e);
+        }
+```
+实际上不用这个我们也可以遍历，直接查出结果集来遍历，为什么还要用Cursor在包装一层来遍历。
+实际上这个在数据量小的时候，实际上没啥差距，甚至普通的查询遍历可读性更强。主要是面对数据量大的时候，也就是大数据集处理会体现出的优势，主要的原理就是它可以逐行读取数据，而不是先把整个结果集读取加载到内存中，这样就可以节省内存空间。实际上我们项目就会涉及到一个盘点的功能，当涉及到范围广数据量大的情况，Cursor就很适合这种情况。
+
+这边说一下Cursor的优势：
+
+ 1. 大数据集处理：
+    
+    逐行读取:
+    Cursor允许你逐行读取数据，而不是一次性将整个结果集加载到内存中。这对于处理非常大的数据集特别有用，因为它可以极大地减少内存消耗，避免内存溢出。
+    
+    分页处理: 可以根据需要处理一部分数据，然后再读取下一部分，这样可以实现数据的分页加载。
+ 2. 流控制：
+    动态读取: 你不需要在开始时等待整个结果集从数据库读取完毕，可以立即处理第一条记录，对于响应时间非常重要的应用场景非常有利。
+    动态改变查询: 使用Cursor可以动态改变查询条件或者操作，而不是一次性固定查询数据。
+ 3. 并发控制:
+    提高并发性: Cursor可以提高数据库多用户并发访问的性能，因为每个用户只会锁定当前正在读取的行，而不是整个表或表的很大一部分。
+    事务一致性: Cursor可以与数据库事务很好地结合，确保在事务处理期间数据的完整性和一致性。
+ 4. 减少网络流量:
+    在客户端与数据库服务器之间的网络通信中，Cursor可以减少网络流量，因为它逐行读取数据，而不是一次性传输整个结果集。
+
+代码上去看Cursor带代码，首先是接口，接口是相当于一个规定，你可以根据这个规定写出一个更好的实现方案，这里就先看一下Cursor接口的三个方法：
+
+isOpen()方法用于检查游标是否已经打开。如果游标已经打开并且可以使用，该方法返回true，否则返回false。
+isConsumed()方法用于检查游标中的所有数据是否都已经被处理。如果游标中的所有数据都已经被读取或者使用，该方法返回true，否则返回false。
+getCurrentIndex()方法返回当前游标位于结果集的索引位置。这个索引位置从0开始计数，它可以用来跟踪已经处理的行数或条目数
+
+这三个方法我们可以判断是否数据集，一行一行读取是否能读完，当前索引，这对我们遍历很有用，本身这个接口就是Iterable<T>迭代器。
+
+一般我们选择的ORM都会对应这个接口有对应的某人实现DefaultCursor。这个我么们可以通过idea工具来查看，总之当遇到一个大数据集加载导致占用内存飙升甚至内存溢出，可以考虑采用这个Cursor工具，来减小内存占用以及Cursor的并发提高效率算短时间。
+
+值得注意的是Cursor用使用try-with-resources语句来自动关闭它，不要占用宝贵的数据库连接。
