@@ -46,6 +46,22 @@ change after
 
 主要的原理就是利用node命令，来获取这个“当前目录”，然后在项目中要用到“当前目录”的地方获取返回过去。
 
+
+在Windows中执行yarn run build 也会报错 ，Unbound variable "PWD"
+
+CMD
+```
+set PWD=%CD%
+yarn run build
+```
+PowerShell
+```
+$env:PWD = (Get-Location).Path
+yarn run build
+```
+
+
+
 （2）mdx文档
 
 mdx文档，和之前的md文档不太一样，mdx是ng是一个md文档的扩展，它可以让我们在md文档中使用jsx语法，来编写我们的代码。
