@@ -55,6 +55,154 @@ npm命令初始化node项目
 nodemon 是一个开发工具，用来自动重启 Node.js 服务器，当检测到文件有变化时，它会自动重启应用
 npm install --save-dev nodemon 命令安装 nodemon 并将其添加到项目的开发依赖项中。这提高了开发效率，尤其是在开发过程中频繁修改代码的情况下
 
-前端代码实现
+## 前端代码实现
 这里要处理的是前端，在文件夹myapp-frontend
 修改App.js
+```
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const App = () => {
+  const [persons, setPersons] = useState([]);
+
+  useEffect(() => {
+    axios.get('/api/persons')
+      .then(response => {
+        setPersons(response.data);
+      });
+  }, []);
+
+  return (
+    <div>
+      <h2>Phonebook</h2>
+      <ul>
+        {persons.map(person => (
+          <li key={person.id}>{person.name}: {person.number}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default App;
+
+```
+
+后端代码实现
+创建index.js
+```
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch((err) => console.error('Error connecting to MongoDB:', err));
+
+// Schema and Model Definition
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+});
+
+const Person = mongoose.model('Person', personSchema);
+
+// Routes
+app.get('/api/persons', (req, res) => {
+  Person.find({}).then(persons => res.json(persons));
+});
+
+app.post('/api/persons', (req, res) => {
+  const body = req.body;
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({ error: 'name or number missing' });
+  }
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  });
+
+  person.save().then(savedPerson => res.json(savedPerson));
+});
+
+// Serve static files from React app
+app.use(express.static('build'));
+
+// Fallback to serve React app for any other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+});
+
+// Start the server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+```
+
+创建.env文件
+```
+MONGODB_URI=<your-mongodb-uri>
+PORT=3001
+
+```
+
+创建package.json 文件
+```
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+```
+
+测试nodemon
+```
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+```
+
+部署到Render
+在根目录，也就是myapp，后前端后端项目是同一级的。
+这个文件将定义如何构建和部署前后端服务。
+````
+services:
+  - type: web
+    name: myapp-backend
+    env: node
+    buildCommand: 'npm install && npm install --prefix ../myapp-frontend && npm run build --prefix ../myapp-frontend'
+    startCommand: 'node index.js'
+    plan: free
+    branch: main
+    envVars:
+      - key: MONGODB_URI
+        name: mongodb_uri
+      - key: PORT
+        name: port
+    rootDir: myapp-backend
+
+  - type: static
+    name: myapp-frontend
+    buildCommand: 'npm install && npm run build'
+    publishPath: myapp-frontend/build
+    plan: free
+    branch: main
+
+````
+
+myapp-backend 服务配置对应的环境变量 MONGODB_URI和PORT
+前端服务将使用 npm run build 构建生产版本，构建并托管最终生成的静态文件
