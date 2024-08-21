@@ -88,7 +88,7 @@ export default App;
 
 ```
 
-后端代码实现
+## 后端代码实现
 创建index.js
 ```
 const express = require('express');
@@ -176,7 +176,7 @@ PORT=3001
   }
 ```
 
-部署到Render
+## 部署到Render
 在根目录，也就是myapp，后前端后端项目是同一级的。
 这个文件将定义如何构建和部署前后端服务。
 ````
@@ -206,3 +206,25 @@ services:
 
 myapp-backend 服务配置对应的环境变量 MONGODB_URI和PORT
 前端服务将使用 npm run build 构建生产版本，构建并托管最终生成的静态文件
+
+创建 GitHub 仓库并推送代码
+初始化Git仓库推送代码
+```
+cd myapp
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/yourusername/myapp.git
+git branch -M main
+git push -u origin main
+
+```
+(上传GitHub远程这一步，你需要先建对应的的myapp的仓库)
+
+配置环境变量
+在Render会自动从Github仓库中拉取代码，构建并部署
+添加MONGODB_URI和PORT（mongoose管理会用到的，这个在后台管理.env文件配置MongoDB的url和对应的端口。）
+
+## 验证部署
+在Render会自动从Github仓库中拉取代码，构建并部署
+访问Render提供的域名，确认应用是否进行
