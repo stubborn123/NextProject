@@ -158,4 +158,385 @@ module.exports = notesRouter
 │   └── middleware.js
 ```
 
-Note on exports
+## Note on exports
+
+
+## Testing Node applications
+自动化测试
+
+JavaScript测试库旧的Mocha，新的有Jest，Vitest，Node还有一个内置的测试库node：test
+
+# b 测试后端应用
+## Test environment
+在后端服务器在Fly.io或Render运行，处于生产模式
+
+Node中的惯例是NODE_ENV环境变量来定义应用执行模式
+在package.json中的脚本，当测试运行时，NODE_ENV获得test值
+```
+{
+  // ...
+  "scripts": {
+
+    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
+    "test": "NODE_ENV=test node --test",
+    "build:ui": "rm -rf build && cd ../frontend/ && npm run build && cp -r build ../backend",
+    "deploy": "fly deploy",
+    "deploy:full": "npm run build:ui && npm run deploy",
+    "logs:prod": "fly logs",
+    "lint": "eslint .",
+  },
+  // ...
+}
+```
+
+nodemon 在npm run dev脚本，指定模式development，我们指定默认npm start命令定义为production（在windows可能无法工作，通过安装cross-env包来解决开发以来依赖）
+
+使用cross-env库来实现跨平台兼容：
+```
+{
+  // ...
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    // ...
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
+  },
+  // ...
+}
+```
+
+## supertest
+supertest是一个编写测试API的测试，将这个包作为开发以来来安装
+```
+npm install --save-dev supertest
+```
+
+## Initializing the database before tests
+
+
+## Running tests one by one
+
+## async/await
+ES7引入的async/await语法，使promise的异步函数方式可以使代码同步的
+以下是一个peomise的获取数据库写法
+```
+Note.find({}).then(notes => {
+  console.log('operation returned the following notes', notes)
+})
+```
+Note.find()方法返回一个 promise ，我们可以通过用then方法注册一个回调函数来访问操作的结果。
+
+进行几个异步函数的调用，异步调用不得不在回调中进行，产生复杂代码，生成回调地狱。
+
+链式promise我们一定程度上控制局面，创建一个then方法调用链来避免。
+```
+Note.find({})
+  .then(notes => {
+    return notes[0].remove()
+  })
+  .then(response => {
+    console.log('the first note is removed')
+    // more code here
+  })
+```
+ES7引入的async和await关键字带来了相同的功能，更可理解，更简洁。
+await
+```
+const notes = await Note.find({})
+
+console.log('operation returned the following notes', notes)
+```
+复杂一点的异步
+```
+const notes = await Note.find({})
+const response = await notes[0].remove()
+
+console.log('the first note is removed')
+```
+
+await关键词不能在JavaScript中随便使用，只有在async函数中才能使用await
+```
+const main = async () => {
+  const notes = await Note.find({})
+  console.log('operation returned the following notes', notes)
+
+  const response = await notes[0].remove()
+  console.log('the first note is removed')
+}
+
+
+main()
+```
+
+代码声明分配给main的函数是异步的，代码用main()调用该函数
+
+## async/await in the backend
+后端改成异步和await，所有异步操作都是一个函数内完成，只需将路由处理函数改为异步函数即可。
+```
+notesRouter.get('/', async (request, response) => {
+  const notes = await Note.find({})
+  response.json(notes)
+})
+```
+
+## more tests and refactoring the backend
+
+Error handling and async/await
+代码位置：https://github.com/fullstack-hy2020/part3-notes-backend/tree/part4-4
+
+## Eliminating the try-catch
+async/await使代码更简洁，代价要添加一些try/catch结构
+所有路由器处理程序遵循相同结构
+```
+try {
+  // do the async operations here
+} catch(exception) {
+  next(exception)
+}
+```
+
+消除这些catch，可以安装express-async-errors库来解决
+安装命令
+```
+npm install express-async-errors
+```
+
+使用这个库，在app.js中引入该库
+```
+const config = require('./utils/config')
+const express = require('express')
+
+require('express-async-errors')
+const app = express()
+const cors = require('cors')
+const notesRouter = require('./controllers/notes')
+const middleware = require('./utils/middleware')
+const logger = require('./utils/logger')
+const mongoose = require('mongoose')
+
+// ...
+
+module.exports = app
+```
+使用前的代码
+```
+notesRouter.delete('/:id', async (request, response, next) => {
+  try {
+    await Note.findByIdAndDelete(request.params.id)
+    response.status(204).end()
+  } catch (exception) {
+    next(exception)
+  }
+})
+```
+使用后
+```
+notesRouter.delete('/:id', async (request, response) => {
+  await Note.findByIdAndDelete(request.params.id)
+  response.status(204).end()
+})
+```
+
+
+Optimizing the beforeEach function
+回到编写我们的测试，设置测试beforeEach函数
+
+refactoring tests
+
+# c 用户管理
+## References across collections
+使用关系型数据库
+
+创建一个users集合
+
+## Mongoose schema for users
+用户创建的笔记在models/user.js中定义代表一个用户的模型
+
+## Creating users
+实现一个创建新用户的路由，涉及到一个密码的问题，不能明文。密码散列应用，用bcrypt软件包来生成密码散列。
+```
+npm install bcrypt
+```
+controllers/users.js文件中定义一个单独的router来处理用户
+
+定义路由器文件内容：
+```
+const bcrypt = require('bcrypt')
+const usersRouter = require('express').Router()
+const User = require('../models/user')
+
+usersRouter.post('/', async (request, response) => {
+  const { username, name, password } = request.body
+
+  const saltRounds = 10
+  const passwordHash = await bcrypt.hash(password, saltRounds)
+
+  const user = new User({
+    username,
+    name,
+    passwordHash,
+  })
+
+  const savedUser = await user.save()
+
+  response.status(201).json(savedUser)
+})
+
+module.exports = usersRouter
+```
+## Creating a new note
+
+## Populate
+
+# d 密钥认证
+
+![Alt text](/static/images/blog/jsontoken.png)
+
+React登录认证
+React代码发送用户名和密码发送服务器
+服务器发送一个token
+令牌经过数字签名，不能伪造
+后端以一个代码响应，表明操作成功，并将令牌与响应一起返回
+浏览器保存令牌，例如保存React应用的状态中
+后端对基于令牌的认证的支持
+
+这里使用的是jsonwebtoken
+```
+npm install jsonwebtoken
+```
+
+登陆代码在login.js
+```
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const loginRouter = require('express').Router()
+const User = require('../models/user')
+
+loginRouter.post('/', async (request, response) => {
+  const { username, password } = request.body
+
+  const user = await User.findOne({ username })
+  const passwordCorrect = user === null
+    ? false
+    : await bcrypt.compare(password, user.passwordHash)
+
+  if (!(user && passwordCorrect)) {
+    return response.status(401).json({
+      error: 'invalid username or password'
+    })
+  }
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  }
+
+  const token = jwt.sign(userForToken, process.env.SECRET)
+
+  response
+    .status(200)
+    .send({ token, username: user.username, name: user.name })
+})
+
+module.exports = loginRouter
+```
+
+浏览器拿到token保存起来，保存到React应用的状态中
+发送请求，React代码将请求一起将token发送到服务器
+服务器使用token来识别用户
+
+Limiting creating new notes to logged in users
+创建新笔记，post请求附带有效token
+
+token从浏览器发送到服务器有几种方式，使用Authorization头，这个头使用了那种认证方案。
+Bearer方案这里采用的是
+```
+Bearer eyJhbGciOiJIUzI1NiIsInR5c2VybmFtZSI6Im1sdXVra2FpIiwiaW
+```
+
+```
+const jwt = require('jsonwebtoken')
+
+// ...
+
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
+
+notesRouter.post('/', async (request, response) => {
+  const body = request.body
+
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+  const user = await User.findById(decodedToken.id)
+
+  const note = new Note({
+    content: body.content,
+    important: body.important === undefined ? false : body.important,
+    user: user._id
+  })
+
+  const savedNote = await note.save()
+  user.notes = user.notes.concat(savedNote._id)
+  await user.save()
+
+  response.json(savedNote)
+})
+```
+辅助函数getTokenFrom将token从authorization头部分离出来。使用jwt.verify检查token的有效性。该方法还解码token，或返回token基于的对象。
+
+## Problems of token-based authentication
+token认证很容易，但是令牌持有者撤销这个token
+
+两种解决方案
+简单的是限制令牌的有效期
+```
+loginRouter.post('/', async (request, response) => {
+  const { username, password } = request.body
+
+  const user = await User.findOne({ username })
+  const passwordCorrect = user === null
+    ? false
+    : await bcrypt.compare(password, user.passwordHash)
+
+  if (!(user && passwordCorrect)) {
+    return response.status(401).json({
+      error: 'invalid username or password'
+    })
+  }
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  }
+
+  // token expires in 60*60 seconds, that is, in one hour
+
+  const token = jwt.sign(
+    userForToken,
+    process.env.SECRET,
+    { expiresIn: 60*60 }
+  )
+
+  response
+    .status(200)
+    .send({ token, username: user.username, name: user.name })
+})
+```
+令牌过期，客户端应用需要获取新令牌，通常强制用户重新登陆应用程序来实现的。
+
+当然代码也要做对应的错误处理
+
+过期时间越短，解决方案越安全，但是时间越短客户可能回频繁登录系统。
+
+另一个解决方案解释将每个令牌信息保存到后端数据库，检查每个API请求检查该令牌对应的访问权是否仍然有效，访问权什么时候撤销，都能知道。
+这里可以选择Redis来保存。
+
+End notes

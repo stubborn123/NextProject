@@ -1,0 +1,133 @@
+---
+title: fullstack_open_04_heisinki_university
+date: '2024-08-14'
+description: 这里是一个关于学习赫尔辛基大学的一个全栈教程的文档学习笔记，这里是第4部分，测试Express服务端程序，以及用户管理
+---
+
+# a 完成前端的登录功能
+
+Handling login
+这部分前端代码 https://github.com/fullstack-hy2020/part2-notes/tree/part5-1
+（后端代码：https://github.com/fullstack-hy2020/part3-notes-backend/tree/part4-9）
+
+在使用克隆这个repo，运行npm install 安装依赖
+后端用npm run dev启动后端
+
+creating new notes
+登录成功返回令牌保存在应用的状态--用户的字段token
+
+saving the token to the browser local storage
+
+a note on using local storage
+
+# b props.children 与 proptypes
+Displaying the login form only when appropriate
+
+the components children aka. props.children
+
+State of the forms
+
+References to components with ref
+
+One point about components
+
+proptypes
+当使用Togglable组件时，必须给按钮标签文本prop一个值。
+
+组件的预期和要求的prop可以用prop-types包来定义。让我们安装这个包。
+```
+npm install prop-types
+```
+
+eslint
+vite 默认安装ESlint，.eslintrc.cjs 文件中定义我们想要的配置
+
+# c 测试React应用
+## Rendering the component for tests
+src/components/Note.test.js中编写测试
+
+Test file location
+
+searching for content in a component
+
+debugging tests
+
+clicking buttons in tests
+
+安装一个库 user-event，模拟用户更容易
+```
+npm install --save-dev @testing-library/user-event
+```
+
+tests for the togglable component
+
+testing for forms
+
+about finding the elements
+
+test coverage
+测试覆盖率
+
+frontend Intergration tests
+后端集成测试，测试测试逻辑并测试连接数据库
+
+snapshot testing
+Vitest提供了一种不同的测试方案，快照测试。
+
+# d 端到端测试
+
+上面的测试时后端测试集成，现在还有一种测试端到端（E2E）测试，我们用浏览器和测试库对网络应用进行E2E测试。涉及到的测试库，例如Selenium，几乎可以和任何浏览器一起使用。
+浏览器选项，是所谓的无头浏览器，也就是没有图形用户界面的浏览器。
+chrome可以在无头模式下使用。
+
+编码过程会出现代码回归，尽可能频繁运行测试时有用处的。
+
+Cypress
+Cypress最近比较流行，容易使用，与Selenium等效果比，需要的麻烦和头绪要少。
+
+cypress安装
+```
+npm install --save-dev cypress
+```
+添加一个npm-script来运行
+```
+{
+  // ...
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "server": "json-server -p3001 db.json",
+
+    "cypress:open": "cypress open"
+  },
+  // ...
+}
+```
+测试Cypress与后端集成测试，后端也要添加npm-script 测试模块下启动
+```
+"start:test": "cross-env NODE_ENV=test node index.js"
+```
+
+命令启动Cypress
+```
+npm run cypress:open
+```
+(m1 不能使用Cypress，可以尝试安装Rosetta2配置终端是必须的 ------ 实际上这个文档有点过时，现在Cypress官方文档已经支持M1和M2)
+
+writing to a form
+
+some things to Note
+
+testing new note form
+
+controlling the state of the database
+
+failed login test
+
+bypassing the ui
+
+changing the importance of a note
+
+running and debugging the tests
