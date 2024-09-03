@@ -1,0 +1,33 @@
+---
+title: WSL的使用
+date:  '2024-09-02 15:00:00'
+description: WSL的使用
+---
+
+本地安装WSL成功，但是在powershell输入命令“wsl”，发现返回“适用于Linux的WIndows子系统没有已安装的分发版”。实际上就说明安装了WSL但是没有安装任何Linux发行版。
+实际要使用的的话，还要安装一个Linux安装版。这个安装版不是下载一个Linux系统镜像，而是从Microsoft Store里下载，比如说在Microsoft Store里搜索“Ubuntu”。
+就可以找到多种Ubuntu的发行版，选择一个评分高的长期支持版本下载安装即可。
+
+PC端自带的Microsoft Store打不开的话，浏览器打开Microsoft Store也可以。
+
+
+WSL简单的使用：
+要启动WSL，直接打开Windows Terminal，PowerShell或者命令提示行，输入以下命令：
+```
+wsl
+```
+相当于打开一个Linux Shell，你各种之前在Linux能用，Windows上不能用的Linux命令都可以使用了。但是有个问题，就是只能在当前的目录，我们想在F盘使用，那就要先切换到F盘，然后再输入wsl启动WSL。
+
+如果你安装了多个Linux发行版，可以查询
+```
+wsl -l -v
+```
+
+WSL的用途：
+1 开发环境，可以在Windows使用Linux开发工具链
+2 管理系统和脚本，可以使用Bash等Linux shell脚本自动化各种任务，使用Linux的命令行工具
+3 学习Linux，感觉在上面要比虚拟机上更方便一些
+4 可以使用更多的网络监控工具“curl”，“wget”，“nmap”甚至渗透和安全研究者可以使用Kail Linux的WSL版本运行黑客工具
+5 支持容器化
+等还有一大堆，简单一句话，之前只能在Linux上使用，只要对应的Linux版本有对应的WSL版本，就可以在Windows上使用。
+
