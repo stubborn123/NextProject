@@ -138,7 +138,11 @@ TypeScript本地关键字type创建一个type
 type Operation = 'multiply' | 'add' | 'divide';
 ```
 
+
+```
 @type/{npm_package}
+```
+
 TypeScript的基本理念，TypeScript希望所有全局使用的代码是类型化的，TypeScript社区也很活跃，不断对常用的npm包的更新和变化做出反应。
 对软件包类型，@types组织中找到，通过这个前缀来找包，比如说npm install --save-dev @types/react @types/express @types/lodash @types/jest @types/mongoose等等
 
@@ -221,3 +225,18 @@ try {
 
 
 More about tsconfig
+tsconfig.json文件配置
+```
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  }
+}
+```
