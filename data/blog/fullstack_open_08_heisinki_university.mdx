@@ -1,0 +1,120 @@
+---
+title: fullstack_open_08_heisinki_university
+date: '2024-09-03 15:39:30'
+description: 这里是一个关于学习赫尔辛基大学的一个全栈教程的文档学习笔记，这里是第8部分，GraphQL
+---
+
+# a GraphQL服务器
+FaceBook开发的GraphQL在网络应用和服务器之间通信
+
+GraphQL的理念与REST非常不同，REST基于资源，GraphQL原理，浏览器代码形成一个所描述所需数据的查询，通过HTTP的POST请求发送到API。
+与REST不同，所有的GraphQL查询都发送到同一个地址，类型是post。
+
+schema and queries
+
+Apollo server
+一个GraphQL服务器，Apollo Server
+npm init 创建一个新的npm项目，并安装所需的依赖项
+```
+npm install apollo-server graphql
+```
+
+Apollo Studio Explorer
+在Apollo服务器卡法模式运行，页面http://localhost:4000有一个按钮查询你的服务器，将我们带到Apollo Studio Explorer。
+
+Parameters of resolver
+
+
+the default resolver
+
+
+Object within an Object
+
+
+Mutations
+
+
+Enum
+
+
+changing a phone number
+
+More on queries
+
+
+# b React与GraphQL
+代码地址：https://github.com/fullstack-hy2020/graphql-phonebook-frontend/tree/part8-1
+
+Apollo client
+安装Apollo客户端所需的依赖项
+```
+npm install @apollo/client graphql
+```
+
+Making queries
+
+named queries and variables
+
+cache
+Apollo客户端将查询的响应保存到cache，为了优化性能，相应已经在缓存中，查询根本不会发送到服务器。
+
+
+Doing mutations
+
+
+updating the cache
+
+
+Handling mutation errors
+
+
+Updating a phone number
+
+Apollo Client and the applications state
+
+# c 数据库与用户管理
+Mongoose and apollo
+安装mongoose
+```
+npm install mongoose
+```
+
+validation
+
+
+User and login
+
+
+Friends list
+
+# d 登录与更新缓存
+User login
+应用的状态中加入变量token
+
+Adding a token to a header
+
+updating cache revisited
+
+# e Fragments与subscriptions
+Fragments
+
+Subscriptions
+
+
+Refactoring the backend
+Apollo Server Express替换Apollo服务器，安装
+```
+npm install apollo-server-express apollo-server-core express @graphql-tools/schema
+```
+
+Subscriptions on the server
+
+
+Subscriotions on the client
+
+
+n+1 problem
+过早的优化是万恶之源。
+
+
+Epilogue

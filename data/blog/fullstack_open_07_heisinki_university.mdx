@@ -69,3 +69,295 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />, document.ge
 ```
 
 React router
+React还有一个专门的导航，ReactRouter库就是一个比较好的解决方案。
+
+安装React Router
+```
+npm install react-router-dom
+```
+启用React Router提供的路由
+```
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link
+} from "react-router-dom"
+
+const App = () => {
+
+  const padding = {
+    padding: 5
+  }
+
+  return (
+    <Router>
+      <div>
+        <Link style={padding} to="/">home</Link>
+        <Link style={padding} to="/notes">notes</Link>
+        <Link style={padding} to="/users">users</Link>
+      </div>
+
+      <Routes>
+        <Route path="/notes" element={<Notes />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/" element={<Home />} />
+      </Routes>
+
+      <div>
+        <i>Note app, Department of Computer Science 2022</i>
+      </div>
+    </Router>
+  )
+}
+```
+这里用的是重命名的方式BrowserRouter as Router
+
+paramterized route
+
+useNavigate
+实现一个简单的登录功能
+
+redirect
+重定向
+
+parameterized route revisited
+
+
+# b 自定义hooks
+Hooks
+React提供了10种不同的内置钩子，包括我们广泛使用的useState和useEffect钩子
+
+现在许多React库已经开始提供基于钩子的apis，像react-redux库useSelector和useDispatch钩子
+
+不要在循环，条件或嵌套函数中调用钩子
+不要从普通的JavaScript函数种调用Hooks（从React函数组件调用Hooks，从自定义Hooks中调用Hooks）
+
+有现有的ESlint规则，可以用来验证应用是否正确使用钩子。
+
+custom Hooks
+自定义钩子是普通的JavaScript函数，可以使用任何其他钩子，只要它们遵守钩子规则。
+
+Spread attributes
+
+More about hooks
+https://github.com/rehooks/awesome-react-hooks
+https://usehooks.com/
+https://overreacted.io/why-do-hooks-rely-on-call-order/
+
+
+# c 样式进阶
+Ready-made UI libraries
+UI框架，就是为应用定义样式的方法。
+最早广泛的UI框架是Bootstrap工具包，现在也很流行。
+
+许多UI框架为WEB应用的开发者提供现成的主题和“组件”，如按钮，菜单和表格。
+许多UI框架都有React友好版本，比如Bootstrap有几个不同的React版本，像reactstrap和react-bootstrap。
+
+React bootstrap
+在react-bootstrap软件包看Bootstrap，安装
+```
+npm install react-bootstrtap
+```
+
+forms
+
+Notiffication
+
+
+Navigation structure
+
+
+Material UI
+这个MaterialUI React库，是实现谷歌开发的Material design视觉语言。
+```
+npm install @mui/material @emotion/react @emotion/styled
+```
+
+form
+
+Notiffication
+通知由Alert组件来完成
+
+Navigation structure
+
+
+Closing thoughts
+
+
+Other UI frameworks
+
+
+Styled components
+
+
+# d webpack
+## bundling
+分为模块的代码必须为浏览器进行捆绑，所有的源代码文件转换为一个包包含所有的应用代码文件。React前端部署到生产中，我们用npm run build命令进行应用的捆绑。
+捆绑我们对定义一个入口点，通常是index.js
+
+安装webpack
+```
+npm install --save-dev webpack webpack-cli
+```
+
+定义新的脚本，为build，用webpack执行捆绑
+```
+// ...
+"scripts": {
+  "build": "webpack --mode=development"
+},
+// ...
+```
+这样执行npm run build 命令，应用代码就被webpack捆绑。该操作产生一个新的main.js文件，添加到build目录下。
+
+## configuration file
+
+webpack.config.js文件
+
+## Bundling React
+应用变成一个最小的React应用，安装所需的库
+```
+npm install react react-dom
+```
+在index.js文件添加，把应用变成一个React应用
+```
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+```
+
+## Loaders
+core-js和regenerator-runtime
+```
+npm install core-js regenerator-runtime
+```
+
+index.js文件顶部导入这些依赖项
+```
+import 'core-js/stable/index.js'
+import 'regenerator-runtime/runtime.js'
+```
+
+## transpilers
+把代码从一种形式的JavaScript转换为另一种形式的过程称为转译，这个术语指的是源代码从一种语言转换为另一种语言来进行编译。
+
+目前我们使用@babel/preset-react预设来转录我们应用的源代码。
+```
+{
+  test: /\.js$/,
+  loader: 'babel-loader',
+  options: {
+
+    presets: ['@babel/preset-react']
+  }
+}
+```
+
+让我们添加@babel/preset-env插件，它包含了使用所有最新特性的代码并将其转译为与ES5标准兼容的代码所需的一切。
+```
+{
+  test: /\.js$/,
+  loader: 'babel-loader',
+  options: {
+
+    presets: ['@babel/preset-env', '@babel/preset-react']
+  }
+}
+```
+
+命令安装预设
+```
+npm install @babel/preset-env --save-dev
+```
+
+CSS
+应用添加一些CSS，创建一个新的src/index.css文件
+```
+.container {
+  margin: 10;
+  background-color: #dee8e4;
+}
+```
+
+在App组件中使用这个样式
+```
+const App = () => {
+  return (
+    <div className="container">
+      hello webpack
+    </div>
+  )
+}
+```
+
+在index.js文件导入该样式
+```
+import './index.css'
+```
+
+```
+npm install style-loader css-loader --save-dev
+```
+
+Webpack-dev-server
+```
+npm install --save-dev webpack-dev-server
+```
+定义一个npm脚本启动dev-server
+```
+{
+  // ...
+  "scripts": {
+    "build": "webpack --mode=development",
+
+    "start": "webpack serve --mode=development"
+  },
+  // ...
+}
+```
+
+source maps
+
+minifying the code
+
+development and production configuration
+
+polyfill
+
+eject
+
+
+# e 各种各样的class components
+## class components
+
+## organization of code in React Application
+
+## Frontend and backend in the same respository
+
+## change on the server
+
+## Virtual DOM
+虚拟DOM，浏览器提供一个DOM API，通过这个浏览器JavaScript可以修改的定义页面外观的元素。开发者使用React，很少不直接操作DOM。
+
+普通的HTML元素
+```
+const element = <h1>Hello, world</h1>
+```
+
+定义应用外观React元素构成虚拟DOM，在ReactDOM库，组件定义的虚拟DOM被渲染成一个真实的DOM，可以由浏览器使用DOM API显示
+```
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <App />
+  )
+```
+
+on the role of react in applications
+
+
+react/node-application security
+
+current trends
+
+
+Useful libraries and interesting links

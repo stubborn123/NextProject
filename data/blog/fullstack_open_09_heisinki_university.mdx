@@ -1,0 +1,223 @@
+---
+title: fullstack_open_09_heisinki_university
+date: '2024-09-04'
+description: 这里是一个关于学习赫尔辛基大学的一个全栈教程的文档学习笔记，这里是第9部分，TypeScript的学习
+---
+
+# a 背景与介绍
+TypeScript是一种编程语言，微软创建，用于大规模JavaScript开发。Azure管理平台和Visual Studio都是TypeScript编写。
+
+## main principle
+TypeScript是JavaScript的一个类型超集（就是继承了JavaScript全部特性，并添加一些新的特性或扩展）,最终被编译成普通的JavaScript代码。
+
+TypeScript由三个独立的又互相满足的部分：
+语言
+编译器
+语言服务
+
+语言由语法，关键字和类型注释组成，语法与JavaScript语法相似但不相同。
+编译器负责类型信息的清楚和代码转换，让TypeScript代码转译成可执行的JavaScript，因为在编译时类型被移除，所以TypeScript实际上不是静态类型代码。
+
+## TypeScript key language features
+关键特征
+
+type annotations
+TypeScript中的类型注解是一种轻量级方式记录函数或变量的预期
+
+以下的例子，定义了一个birthdayGreeter函数，它接受了两个参数：一个是字符串类型，一个是数字类型：
+```
+const birthdayGreeter = (name: string, age: number): string => {
+  return `Happy birthday ${name}, you are now ${age} years old!`;
+};
+
+const birthdayHero = "Jane User";
+const age = 22;
+
+console.log(birthdayGreeter(birthdayHero, age));
+```
+
+structural typing
+TypeScript 是一种结构化语言，第一个元素的类型中每一个特征，第二个元素也存在对应的，两个元素彼此兼容
+
+
+Type inference
+
+
+Type erasure
+
+## why should one use TypeScript
+
+Incomplete, invalid or missing types in external libraries
+使用外部库，会发现一些库的类型声明缺失无效，因为外部库不是TypeScript编写
+要自己定义类型声明
+
+Sometimes, type inference needs assistance
+
+
+Mysterious type errors
+
+
+# b TypeScript的一小步
+
+setting things up
+在编译器安装TypeScript ，vscode可以与TypeScript原生工作。TypeScrpitBern本身不被执行，需要编译成JavaScript才可以被执行。
+
+编写第一个TypeScript应用，可以从npm包ts-node开始，编译执行指定的TypeScript文件，不需要单独的编译步骤
+
+运行ts-node和官方的typescript包全局安装
+```
+npm install -g ts-node typescript
+```
+
+一个npm项目，在一个空目录运行命令npm init来配置
+```
+npm install --save-dev ts-node typescript
+```
+
+并在package.json中设置script
+```
+{
+  // ..
+  "scripts": {
+
+    "ts-node": "ts-node"
+  },
+  // ..
+}
+```
+现在通过运行 npm run ts-node在这个目录使用ts-node
+ts-node运行file.ts,整个命令
+```
+npm run ts-node -- file.ts
+```
+
+TypeScript提供了一个在线游乐场，地址就是：https://www.typescriptlang.org/play/
+
+A note about the coding style
+JavaScript是比较宽松，可以命名或者匿名函数，通过const，let或者var
+
+项目配置文件tsconfig.json
+```
+{
+  "compilerOptions":{
+    "noImplicitAny": false
+  }
+}
+```
+这个文件定义TypeScript编译器解释代码，这里刚开始选择只是用编译器noImplicitAny,这个编译器不要求所有的变量都有类型。
+
+乘法器代码：
+```
+const multiplicator = (a, b, printText) => {
+  console.log(printText,  a * b);
+}
+
+multiplicator(2, 4, 'Multiplied numbers 2 and 4, the result is:');
+```
+
+ps:这些首先你要出是一个npm初始化node项目 npm init -y，开发依赖项ts-node和官方的typescript包全局安装（ts-node是一个直接运行TypeScript代码的工具，集成了TypeScript和node.js）
+
+这边用的是ts-node运行，测试编译运行npm run ts-node -- multiplier.ts （跟普通的node一样）
+
+如果代码改成下面
+```
+const multiplicator = (a, b, printText) => {
+  console.log(printText,  a * b);
+}
+
+multiplicator('how about a string?', 4, 'Multiplied a string and 4, the result is:');
+```
+
+运行的结果是 NaN
+这就是TypeScript的第一个好处的地方
+
+
+Creating your first own types
+TypeScript本地关键字type创建一个type
+```
+type Operation = 'multiply' | 'add' | 'divide';
+```
+
+@type/{npm_package}
+TypeScript的基本理念，TypeScript希望所有全局使用的代码是类型化的，TypeScript社区也很活跃，不断对常用的npm包的更新和变化做出反应。
+对软件包类型，@types组织中找到，通过这个前缀来找包，比如说npm install --save-dev @types/react @types/express @types/lodash @types/jest @types/mongoose等等
+
+Improving the project
+添加npm脚本来玉娇案行我们两个程序
+```
+{
+  "name": "fs-open",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "ts-node": "ts-node",
+
+    "multiply": "ts-node multiplier.ts",
+    "calculate": "ts-node calculator.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
+  }
+}
+```
+
+我们可以通过以下命令行参数，
+```
+const multiplicator = (a: number, b: number, printText: string) => {
+  console.log(printText,  a * b);
+}
+
+const a: number = Number(process.argv[2])
+const b: number = Number(process.argv[3])
+multiplicator(a, b, `Multiplied ${a} and ${b}, the result is:`);
+```
+
+运行方式如下：
+```
+npm run multiply 5 2
+```
+
+
+改进版
+```
+interface MultiplyValues {
+  value1: number;
+  value2: number;
+}
+
+const parseArguments = (args: Array<string>): MultiplyValues => {
+  if (args.length < 4) throw new Error('Not enough arguments');
+  if (args.length > 4) throw new Error('Too many arguments');
+
+  if (!isNaN(Number(args[2])) && !isNaN(Number(args[3]))) {
+    return {
+      value1: Number(args[2]),
+      value2: Number(args[3])
+    }
+  } else {
+    throw new Error('Provided values were not numbers!');
+  }
+}
+
+const multiplicator = (a: number, b: number, printText: string) => {
+  console.log(printText,  a * b);
+}
+
+try {
+  const { value1, value2 } = parseArguments(process.argv);
+  multiplicator(value1, value2, `Multiplied ${value1} and ${value2}, the result is:`);
+} catch (error: unknown) {
+  let errorMessage = 'Something bad happened.'
+  if (error instanceof Error) {
+    errorMessage += ' Error: ' + error.message;
+  }
+  console.log(errorMessage);
+}
+```
+
+
+More about tsconfig
