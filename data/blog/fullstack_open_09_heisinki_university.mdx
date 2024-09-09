@@ -240,3 +240,304 @@ tsconfig.json文件配置
   }
 }
 ```
+
+Adding Express to the mix
+全栈开发，安装Express
+```
+npm install express
+```
+
+在package.json 中添加start脚本
+```
+{
+  // ..
+  "scripts": {
+    "ts-node": "ts-node",
+    "multiply": "ts-node multiplier.ts",
+    "calculate": "ts-node calculator.ts",
+
+    "start": "ts-node index.ts"
+  },
+  // ..
+}
+```
+
+但是报错
+```
+npm install --save-dev @types/express
+```
+
+修改express修饰
+```
+import express from 'express';
+```
+
+运行开发
+安装ts-note-dev安装开发依赖项
+```
+npm install --save-dev ts-node-dev
+```
+
+在package.json中添加一个脚本
+```
+{
+  // ...
+  "scripts": {
+      // ...
+
+      "dev": "ts-node-dev index.ts",
+  },
+  // ...
+}
+```
+通过运行npm run dev,就有一个可以工作，自动重载开发环境
+
+代码里面的req要改成_req
+
+http://localhost:3003/PING
+
+## The horrors of any
+HTTP POST 端点calculate添加
+```
+import { calculator } from './calculator';
+
+// ...
+
+app.post('/calculate', (req, res) => {
+  const { value1, value2, op } = req.body;
+
+  const result = calculator(value1, value2, op);
+  res.send(result);
+});
+```
+
+这里有一个问题，在上面的代码，鼠标在上边悬停，提示any类型。这个any类型，所有的变量都有any类型。在TypeScript中，每一个没有类型的变量，其类型不能被隐式推断出来，就变成了类型any。Any是一种 "通配符 "类型，字面意思是代表whatever类型。
+
+人们没有对函数进行类型化，表示它可以是变成隐含的任何类型。
+也可以显式的给事物输入any。
+隐士和显式任意类型之间的唯一区别是代码的外观，对编译器来说没区别。
+any被显式执行时，代码与隐式推断不同。
+
+配置规则noImplicitAny存在于编译器级别，建议保持它。
+
+但是这段代码为什么没有产生警告any类型，我们设置了noImplicitAny。原因是express Request对象的query字段是明确的类型any。我们用来向应用发布数据的request.body字段也是如此。
+安装eslint和它的TypeScript扩展，可以帮助我们强制执行编码风格
+
+安装eslint和它的TypeScript扩展
+```
+npm install --save-dev eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+
+把eslint配置为disallow explicit any，在.eslintrc中写入以下规则
+```
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+
+    "@typescript-eslint/no-explicit-any": 2
+  }
+}
+```
+
+# c TypeScript版的express应用
+setting up the project
+创建一个项目
+
+运行npm init并安装typescript包作为依赖
+```
+ npm install typescript --save-dev
+```
+
+TypeScript的本地编译器（tsc）可以通过生成tsconfig.json文件帮助初始化项目
+
+tsc命令添加到package.json的可执行脚本列表中。
+运行tsc的npm脚本被设置成如下
+
+```
+{
+  // ..
+  "scripts": {
+
+    "tsc": "tsc"
+  },
+  // ..
+}
+```
+
+通过命令初始化tsconfig.json设置
+```
+ npm run tsc -- --init
+```
+
+这个tsconfig.json文件配置如下：
+```
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "outDir": "./build/",
+    "module": "commonjs",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true
+  }
+}
+```
+配置说明：
+target配置告诉编译器在生成JavaScript时要使用哪个ECMAScript版本。ES6被大多数浏览器所支持，所以它是一个好的、安全的选择。
+
+outDir tells where the compiled code should be placed.（告诉编译后的代码在哪）
+
+module tells the compiler that we want to use CommonJS modules in the compiled code. 
+This means we can use the old require syntax instead of the import one, which is not supported in older versions of Node, such as version 10.
+（我你们要用到什么CommonJS模块，这意味着我们可以使用旧的require语法，而不是import语法，因为import语法在旧的Node版本中不支持，比如版本10）
+
+strict is actually a shorthand for multiple separate options: 
+noImplicitAny, noImplicitThis, alwaysStrict, strictBindCallApply, strictNullChecks, strictFunctionTypes and strictPropertyInitialization.
+（脚本是实际上一个很短混合分离的选项：无隐含任何，无隐含，始终严格，严格绑定，严格空检查，严格函数类型和严格属性初始化）
+
+安装好配置，继续安装express，当然还有
+```
+// 是一个TypeScript的定义文件包，他为Node流行的Express的web框架，提供类型定义
+@types/express
+```
+
+再安装eslint
+```
+npm install express
+npm install --save-dev eslint @types/express @typescript-eslint/eslint-plugin @typescript-eslint/parser
+```
+
+package.json
+```
+{
+  "name": "flight_diary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "author": "Jane Doe",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}
+```
+
+再创建一个.eslintrc文件
+```
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "plugins": ["@typescript-eslint"],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "@typescript-eslint/semi": ["error"],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
+    "no-case-declarations": "off"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
+```
+
+设置开发环境，编写一些严肃代码
+
+一种是使用nodemon与ts-node。现在可以用ts-node-dev做相同的事，来代替。
+安装ts-node-dev
+```
+npm install --save-dev ts-node-dev
+```
+
+再定义几个npm脚本
+```
+{
+  // ...
+  "scripts": {
+    "tsc": "tsc",
+
+    "dev": "ts-node-dev index.ts",
+    "lint": "eslint --ext .ts ."
+  },
+  // ...
+}
+```
+
+# let there be code
+创建ping端点开始
+
+index.ts
+```
+import express from 'express';
+const app = express();
+app.use(express.json());
+
+const PORT = 3000;
+
+app.get('/ping', (_req, res) => {
+  console.log('someone pinged here');
+  res.send('pong');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+```
+
+如果我们运行eslint，它也会解释build目录下的文件。
+我们不希望这样，因为那里的代码是由编译器生成的。
+我们可以通过创建一个.eslintignore文件，列出我们希望eslint忽略的内容，就像我们对git和.gitignore所做的那样。
+
+添加一个npm脚本，以便在生产模式下运行该应用(start)
+```
+{
+  // ...
+  "scripts": {
+    "tsc": "tsc",
+    "dev": "ts-node-dev index.ts",
+    "lint": "eslint --ext .ts .",
+
+    "start": "node build/index.js"
+  },
+  // ...
+}
+```
+npm start 运行应用，验证生产模式的构建也是有效的
+
+（这里要把index.ts放在src目录下）
+在编译器和eslint帮助下开始良好的代码质量，创建一个应用就可以部署到生产环境。
+
+Implemeting the functionality
